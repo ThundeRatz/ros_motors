@@ -156,7 +156,6 @@ add_dependencies(ros_motors ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTE
 ## Specify libraries to link a library or executable target against
 target_link_libraries(ros_motors
   ${catkin_LIBRARIES}
-  trekking_msgs
 )
 
 #############
