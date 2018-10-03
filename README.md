@@ -1,4 +1,4 @@
 # ros_motors
-Node para controlar o motor e o servo. 
+ROS package for motor controll.
 
-Será subscriber de um tópico com uma (possivelmente) custom message, e irá inicialmente utilizar o serial para controlar o motor e o servo.
+Subscribes to `motors` topic, collecting data from a custom `motor` message (see [trekking_msgs](https://github.com/ThundeRatz/trekking_msgs)) that should be included in the same workspace of this package, and sends it via USB.
