@@ -28,7 +28,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include <trekking_msgs/Motor.h>
+#include <ros_motors/Motor.h>
 #include "ros_motors/serial.h"
 #include "ros_motors/errno_string.h"
 
@@ -40,7 +40,7 @@ class MotorNode
   public:
     MotorNode();
     void spin();
-    void motors_callback(const trekking_msgs::Motor motor_msg);
+    void motors_callback(const ros_motors::Motor motor_msg);
 
   private:
     ros::NodeHandle nh_;
@@ -77,7 +77,7 @@ void MotorNode::init_serial()
   }
 }
 
-void MotorNode::motors_callback(const trekking_msgs::Motor motor_msg)
+void MotorNode::motors_callback(const ros_motors::Motor motor_msg)
 {
   if (motor_msg.header.stamp == ros::Time(0))
   {
