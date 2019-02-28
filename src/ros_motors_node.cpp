@@ -72,6 +72,7 @@ void MotorNode::init_serial()
   fd = serial_open("/dev/arduino", &baudrate, O_WRONLY);
   while (fd == -1)
   {
+    ROS_INFO("Serial open failed");
     fd = serial_open("/dev/arduino", &baudrate, O_WRONLY);
     ros::Duration(0.01).sleep();
   }
@@ -90,13 +91,13 @@ void MotorNode::motors_callback(const ros_motors::Motor motor_msg)
 
 void MotorNode::drive(int servo, int speed)
 {
-  init_serial();
   uint8_t message[6] = { 255, servo < 0, abs(servo), speed < 0, abs(speed), 254 };
-  if (write(fd, message, sizeof(message)) == -1)
+  if (write(this->fd, message, sizeof(message)) == -1)
   {
     std::cerr << "write: " << errno_string() << std::endl;
-    close(fd);
+    close(this->fd);
     init_serial();
+    fsync(this->fd);
   }
   cur_speed = speed;
 }
@@ -104,11 +105,6 @@ void MotorNode::drive(int servo, int speed)
 void MotorNode::set_max_speed(int new_max_speed)
 {
   max_speed = new_max_speed > 255 ? 255 : new_max_speed;
-}
-
-void MotorNode::reset_max_speed()
-{
-  max_speed = INIT_VMAX;
 }
 
 void MotorNode::spin()
@@ -124,10 +120,10 @@ void MotorNode::spin()
     {
       set_max_speed(max_speed_par);
     }
-    if (use_serial)
-    {
-      drive(this->servo, this->speed);
-    }
+
+    drive(this->servo, this->speed);
+    ros::Rate r(300.0);
+    r.sleep();
   }
 }
 
