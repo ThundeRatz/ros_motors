@@ -32,10 +32,10 @@
 #include "ros_motors/serial.h"
 #include "ros_motors/errno_string.h"
 
-#define INIT_VMAX 255
 #define abs(x) ((x) > 0 ? (x) : -(x))
 #define constrain(x, min , max) ((x) < (min) ? (min) : (x) > (max) ? (max) : (x))
 
+#define INIT_VMAX 255
 #define SERVO_OFFSET 23
 
 class MotorNode
@@ -99,7 +99,7 @@ void MotorNode::drive(int servo, int speed)
   speed = constrain(speed, -255, 255);
 
   uint8_t message[6] = { 255, servo < 0, abs(servo), speed < 0, abs(speed), 254 };
-  
+
   if (write(this->fd, message, sizeof(message)) == -1)
   {
     std::cerr << "write: " << errno_string() << std::endl;
@@ -118,7 +118,11 @@ void MotorNode::set_max_speed(int new_max_speed)
 void MotorNode::spin()
 {
   int max_speed_par;
-  nh_.param("max_speed", max_speed_par, INIT_VMAX);
+  if(nh_.getParam("max_speed",max_speed_par))
+  {
+    set_max_speed(max_speed_par)
+  }
+
   ros::Rate r(300);
 
   while (ros::ok())
