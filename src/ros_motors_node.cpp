@@ -73,7 +73,7 @@ MotorNode::MotorNode() : nh_()
 void MotorNode::init_serial()
 {
   fd = serial_open("/dev/arduino", &baudrate, O_WRONLY);
-  while (fd == -1)
+  while (fd == -1 && ros::ok())
   {
     ROS_INFO("Serial open failed");
     fd = serial_open("/dev/arduino", &baudrate, O_WRONLY);
