@@ -117,12 +117,6 @@ void MotorNode::set_max_speed(int new_max_speed)
 
 void MotorNode::spin()
 {
-  int max_speed_par;
-  if(nh_.getParam("max_speed",max_speed_par))
-  {
-    set_max_speed(max_speed_par)
-  }
-
   ros::Rate r(300);
 
   while (ros::ok())
