@@ -57,7 +57,7 @@ class MotorNode
 
     int fd;
     const bool use_serial = true;
-    const int baudrate = 9600;
+    const int baudrate = 19200;
 
     void set_max_speed(int new_max_speed);
     void reset_max_speed();
