@@ -34,6 +34,9 @@
 
 #define INIT_VMAX 255
 #define abs(x) ((x) > 0 ? (x) : -(x))
+#define constrain(x, min , max) ((x) < (min) ? (min) : (x) > (max) ? (max) : (x))
+
+#define SERVO_OFFSET 23
 
 class MotorNode
 {
@@ -91,7 +94,12 @@ void MotorNode::motors_callback(const ros_motors::Motor motor_msg)
 
 void MotorNode::drive(int servo, int speed)
 {
+  servo += SERVO_OFFSET;
+  servo = constrain(servo, -255, 255);
+  speed = constrain(speed, -255, 255);
+
   uint8_t message[6] = { 255, servo < 0, abs(servo), speed < 0, abs(speed), 254 };
+  
   if (write(this->fd, message, sizeof(message)) == -1)
   {
     std::cerr << "write: " << errno_string() << std::endl;
