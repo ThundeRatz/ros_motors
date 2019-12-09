@@ -32,8 +32,11 @@
 #include "ros_motors/serial.h"
 #include "ros_motors/errno_string.h"
 
-#define INIT_VMAX 255
 #define abs(x) ((x) > 0 ? (x) : -(x))
+#define constrain(x, min , max) ((x) < (min) ? (min) : (x) > (max) ? (max) : (x))
+
+#define INIT_VMAX 255
+#define SERVO_OFFSET 23
 
 class MotorNode
 {
@@ -54,7 +57,7 @@ class MotorNode
 
     int fd;
     const bool use_serial = true;
-    const int baudrate = 9600;
+    const int baudrate = 19200;
 
     void set_max_speed(int new_max_speed);
     void reset_max_speed();
@@ -70,7 +73,7 @@ MotorNode::MotorNode() : nh_()
 void MotorNode::init_serial()
 {
   fd = serial_open("/dev/arduino", &baudrate, O_WRONLY);
-  while (fd == -1)
+  while (fd == -1 && ros::ok())
   {
     ROS_INFO("Serial open failed");
     fd = serial_open("/dev/arduino", &baudrate, O_WRONLY);
@@ -91,7 +94,12 @@ void MotorNode::motors_callback(const ros_motors::Motor motor_msg)
 
 void MotorNode::drive(int servo, int speed)
 {
+  servo += SERVO_OFFSET;
+  servo = constrain(servo, -255, 255);
+  speed = constrain(speed, -255, 255);
+
   uint8_t message[6] = { 255, servo < 0, abs(servo), speed < 0, abs(speed), 254 };
+
   if (write(this->fd, message, sizeof(message)) == -1)
   {
     std::cerr << "write: " << errno_string() << std::endl;
@@ -109,20 +117,12 @@ void MotorNode::set_max_speed(int new_max_speed)
 
 void MotorNode::spin()
 {
-  int max_speed_par;
-  nh_.param("max_speed", max_speed_par, INIT_VMAX);
+  ros::Rate r(300);
 
   while (ros::ok())
   {
     ros::spinOnce();
-
-    if (nh_.getParam("max_speed", max_speed_par) && max_speed_par != max_speed)
-    {
-      set_max_speed(max_speed_par);
-    }
-
     drive(this->servo, this->speed);
-    ros::Rate r(300.0);
     r.sleep();
   }
 }
